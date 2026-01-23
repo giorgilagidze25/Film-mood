@@ -4,7 +4,7 @@ import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
-  const apiKey = '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'
+  const apiKey = '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'
   
   const [movies, setMovies] = useState([])
   const [loading, setLoading] = useState(false)
