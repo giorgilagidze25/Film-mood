@@ -9,36 +9,49 @@ function App() {
   const [movies, setMovies] = useState([])
   const [loading, setLoading] = useState(false)
 
-  const getMoviesByMood = async (e) => {
+ const getMoviesByMood = async (mood) => {
+  try {
     setLoading(true)
     setMovies([])
 
-    const prompt = `Recommend 5 ${e} movies. 
+    const prompt = `Recommend 5 ${mood} movies. 
 Return only a numbered list with movie name and year.`
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
+        "HTTP-Referer": "http://localhost:5173",
+        "X-Title": "Movie Mood App"
       },
       body: JSON.stringify({
-        model: "xiaomi/mimo-v2-flash:free",
+        model: "openai/gpt-3.5-turbo",
         messages: [
           { role: "system", content: "You are a movie expert." },
-          { role: "user", content: prompt },
-        ],
-      }),
+          { role: "user", content: prompt }
+        ]
+      })
     })
 
     const data = await response.json()
-    const text = data.choices[0].message.content
 
-    const list = text.split("\n").filter((line) => line.trim() !== "")
+    if (!data.choices) {
+      console.error("API error:", data)
+      return
+    }
+
+    const text = data.choices[0].message.content
+    const list = text.split("\n").filter(Boolean)
 
     setMovies(list)
+  } catch (err) {
+    console.error(err)
+  } finally {
     setLoading(false)
   }
+}
+
 
   return (
     <div className="card">
